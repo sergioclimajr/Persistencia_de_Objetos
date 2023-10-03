@@ -61,6 +61,15 @@ public class Orcamento {
 		this.valor -= componente.getPreco();
 	}
 	
+	public Componente localizar(String descricao) {
+		for (Componente componente : componentes) {
+			if (componente.getDescricao() == descricao) {
+				return componente;
+			}
+		}
+		return null;
+	}
+	
 	public Componente localizar(int idComp) {
 		for (Componente componente : componentes) {
 			if (componente.getId() == idComp) {

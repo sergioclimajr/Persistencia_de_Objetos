@@ -87,7 +87,7 @@ public class TelaComponente {
 
 		frame.setResizable(false);
 		frame.setTitle("Componente");
-		frame.setBounds(100, 100, 729, 425);
+		frame.setBounds(100, 100, 730, 425);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		frame.addWindowListener(new WindowAdapter() {
@@ -110,7 +110,7 @@ public class TelaComponente {
 		table.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				label_4.setText("selecionado="+ (String) table.getValueAt( table.getSelectedRow(), 0));
+				label_4.setText("selecionado: "+ (String) table.getValueAt(table.getSelectedRow(), 1));
 			}
 		});
 		table.setGridColor(Color.BLACK);
@@ -138,27 +138,52 @@ public class TelaComponente {
 		label_2 = new JLabel("Descrição:");
 		label_2.setHorizontalAlignment(SwingConstants.LEFT);
 		label_2.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		label_2.setBounds(21, 269, 71, 14);
+		label_2.setBounds(20, 240, 71, 14);
 		frame.getContentPane().add(label_2);
-
+		
 		textField = new JTextField();
 		textField.setFont(new Font("Dialog", Font.PLAIN, 12));
 		textField.setColumns(10);
-		textField.setBounds(80, 264, 250, 20);
+		textField.setBounds(80, 240, 250, 20);
 		frame.getContentPane().add(textField);
+		
+		label_3 = new JLabel("Preço:");
+		label_3.setHorizontalAlignment(SwingConstants.LEFT);
+		label_3.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		label_3.setBounds(20, 265, 63, 14);
+		frame.getContentPane().add(label_3);
+
+		textField_1 = new JTextField();
+		textField_1.setFont(new Font("Dialog", Font.PLAIN, 12));
+		textField_1.setColumns(10);
+		textField_1.setBounds(80, 265, 100, 20);
+		frame.getContentPane().add(textField_1);
+		
+		label_5 = new JLabel("Estoque:");
+		label_5.setHorizontalAlignment(SwingConstants.LEFT);
+		label_5.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		label_5.setBounds(20, 290, 63, 14);
+		frame.getContentPane().add(label_5);
+		
+		textField_2 = new JTextField();
+		textField_2.setFont(new Font("Dialog", Font.PLAIN, 12));
+		textField_2.setColumns(10);
+		textField_2.setBounds(80, 290, 100, 20);
+		frame.getContentPane().add(textField_2);
 
 		button_1 = new JButton("Criar novo Componente");
 		button_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					if(textField.getText().isEmpty() || textField_1.getText().isEmpty()) {
+					if(textField.getText().isEmpty() || textField_1.getText().isEmpty() || textField_2.getText().isEmpty()) {
 						label.setText("campo vazio");
 						return;
 					}
-					String placa = textField.getText();
-					String modelo = textField_1.getText();
-					Fachada.criarComponente(modelo, 0, 0);
-					label.setText("Componente criado: "+ placa);
+					String descricao = textField.getText();
+					double preco = Double.parseDouble(textField_1.getText());
+					int estoque = Integer.parseInt(textField_2.getText());
+					Fachada.criarComponente(descricao, preco, estoque);
+					label.setText("Componente criado: "+ descricao);
 					listagem();
 				}
 				catch(Exception ex) {
@@ -167,7 +192,7 @@ public class TelaComponente {
 			}
 		});
 		button_1.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		button_1.setBounds(300, 300, 180, 23);
+		button_1.setBounds(80, 345, 180, 23);
 		frame.getContentPane().add(button_1);
 
 		button = new JButton("Listar");
@@ -179,52 +204,29 @@ public class TelaComponente {
 		});
 		button.setBounds(308, 11, 89, 23);
 		frame.getContentPane().add(button);
-
-		label_3 = new JLabel("Preço:");
-		label_3.setHorizontalAlignment(SwingConstants.LEFT);
-		label_3.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		label_3.setBounds(360, 269, 63, 14);
-		frame.getContentPane().add(label_3);
-
-		textField_1 = new JTextField();
-		textField_1.setFont(new Font("Dialog", Font.PLAIN, 12));
-		textField_1.setColumns(10);
-		textField_1.setBounds(400, 264, 100, 20);
-		frame.getContentPane().add(textField_1);
-		
-		label_5 = new JLabel("Estoque:");
-		label_5.setHorizontalAlignment(SwingConstants.LEFT);
-		label_5.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		label_5.setBounds(525, 269, 63, 14);
-		frame.getContentPane().add(label_5);
-		
-		textField_2 = new JTextField();
-		textField_2.setFont(new Font("Dialog", Font.PLAIN, 12));
-		textField_2.setColumns(10);
-		textField_2.setBounds(580, 264, 100, 20);
-		frame.getContentPane().add(textField_2);
 		
 		
 		button_2 = new JButton("Apagar selecionado");
 		button_2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try{
-					if (table.getSelectedRow() >= 0){
+					if (table.getSelectedRow() >= 0){	
 						label.setText("nao implementado " );
-						String placa = (String) table.getValueAt( table.getSelectedRow(), 0);
-
-						Fachada.excluirComponente(0);
-						label.setText("Componente apagado" );
+						String descricao = (String) table.getValueAt( table.getSelectedRow(), 1);
+						Fachada.excluirComponente(descricao);
+						label.setText("componente apagado" );
 						listagem();
 					}
 					else
-						label.setText("nao selecionado");
+						label.setText("não selecionado");
 				}
 				catch(Exception ex) {
 					label.setText(ex.getMessage());
 				}
 			}
 		});
+		
+		
 		button_2.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		button_2.setBounds(520, 200, 171, 23);
 		frame.getContentPane().add(button_2);
@@ -235,8 +237,8 @@ public class TelaComponente {
 			public void actionPerformed(ActionEvent e) {
 				try{
 					if (table.getSelectedRow() >= 0){	
-						int idComp = (int) table.getValueAt( table.getSelectedRow(), 0);
-						Componente comp = Fachada.localizarComponente(idComp);
+						String descricao = (String) table.getValueAt( table.getSelectedRow(), 1);
+						Componente comp = Fachada.localizarComponente(descricao);
 
 						if(comp != null) {
 							String texto="";
@@ -256,7 +258,7 @@ public class TelaComponente {
 				}
 			}
 		});
-		button_3.setBounds(300, 200, 134, 23);
+		button_3.setBounds(300, 200, 170, 23);
 		frame.getContentPane().add(button_3);
 	}
 

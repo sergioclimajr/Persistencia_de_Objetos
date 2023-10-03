@@ -59,10 +59,10 @@ public class Fachada {
 	
 	
 	//		Localizar Componente
-	public static Componente localizarComponente(int idComp) throws Exception {
-		Componente comp = daocomponente.read(idComp);
+	public static Componente localizarComponente(String descricao) throws Exception {
+		Componente comp = daocomponente.read(descricao);
 		if (comp == null) {
-			throw new Exception("Componente inexistente: " + idComp);
+			throw new Exception("Componente inexistente: " + descricao);
 		}
 		return comp;
 	}
@@ -203,12 +203,12 @@ public class Fachada {
 	
 	
 	//			Excluir Componente do Banco de Dados
-	public static void excluirComponente(int idComp) throws Exception {
+	public static void excluirComponente(String descricao) throws Exception {
 		DAO.begin();
-		Componente comp = daocomponente.read(idComp);
+		Componente comp = daocomponente.read(descricao);
 		if (comp == null) {
 			DAO.rollback();
-			throw new Exception("Excluir Componente - componente inexistente: ID nº " + idComp);
+			throw new Exception("Excluir Componente - componente inexistente");
 		}
 		
 		for (Orcamento orc : comp.getOrcamentos()) {
@@ -284,15 +284,15 @@ public class Fachada {
 	
 	
 	//		ADICIONAR PEÇA AO ORÇAMENTO
-	public static void adicionarCompAoOrcamento(int idOrc, int idComp) throws Exception {
+	public static void adicionarCompAoOrcamento(int idOrc, String descricao) throws Exception {
 		DAO.begin();
 		Orcamento orc = daoorcamento.read(idOrc);
 		if (orc == null) {
 			DAO.rollback();
-			throw new Exception("Adicionar componente ao orçamento - orçamento inexistente: ID nº " + idOrc);
+			throw new Exception("Adicionar componente ao orçamento - orçamento inexistente.");
 		}
 		
-		Componente comp = daocomponente.read(idComp);
+		Componente comp = daocomponente.read(descricao);
 		if (comp == null) {
 			DAO.rollback();
 			throw new Exception("Adicionar componente ao orçamento - componente inexistente: ID nº " + idOrc);
@@ -305,8 +305,30 @@ public class Fachada {
 	}
 	
 	
-	//			REMOVER PEÇA DO ORÇAMENTO
-	public static void removerCompDoOrcamento(int idOrc, int idComp) throws Exception {
+	//		ADICIONAR PEÇA AO ORÇAMENTO PELO ID
+	public static void adicionarCompAoOrcamento(int idOrc, int idComp) throws Exception {
+		DAO.begin();
+		Orcamento orc = daoorcamento.read(idOrc);
+		if (orc == null) {
+			DAO.rollback();
+			throw new Exception("Adicionar componente ao orçamento - orçamento inexistente.");
+		}
+		
+		Componente comp = daocomponente.readById(idComp);
+		if (comp == null) {
+			DAO.rollback();
+			throw new Exception("Adicionar componente ao orçamento - componente inexistente.");
+		}
+		
+		orc.adicionar(comp);
+		daoorcamento.update(orc);
+				
+		DAO.commit();
+	}
+	
+	
+	//			REMOVER PEÇA DO ORÇAMENTO PELA DESCRIÇÃO
+	public static void removerCompDoOrcamento(int idOrc, String descricao) throws Exception {
 		DAO.begin();
 		Orcamento orc = daoorcamento.read(idOrc);
 		if (orc == null) {
@@ -314,9 +336,9 @@ public class Fachada {
 			throw new Exception("Remover componente do orçamento - orçamento inexistente: ID nº " + idOrc);
 		}
 		
-		Componente comp = orc.localizar(idComp);
+		Componente comp = orc.localizar(descricao);
 		if (comp == null) {
-			throw new Exception("Remover componente do orçamento - componente não consta no orçamento: ID nº " + idOrc);
+			throw new Exception("Remover componente do orçamento - componente não consta no orçamento");
 		}
 		
 		orc.remover(comp);
@@ -324,6 +346,36 @@ public class Fachada {
 		
 		DAO.commit();
 	}
+	
+	
+	//	REMOVER PEÇA DO ORÇAMENTO PELA DESCRIÇÃO
+	public static void removerCompDoOrcamento(int idOrc, int idComp) throws Exception {
+	DAO.begin();
+	Orcamento orc = daoorcamento.read(idOrc);
+	if (orc == null) {
+		DAO.rollback();
+		throw new Exception("Remover componente do orçamento - orçamento inexistente: ID nº " + idOrc);
+	}
+	
+	Componente comp = orc.localizar(idComp);
+	if (comp == null) {
+		throw new Exception("Remover componente do orçamento - componente não consta no orçamento");
+	}
+	
+	orc.remover(comp);
+	daoorcamento.update(orc);
+	
+	DAO.commit();
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	public static boolean validarCPF(String cpf) {
         String cpfNumerico = cpf.replaceAll("[^0-9]", "");

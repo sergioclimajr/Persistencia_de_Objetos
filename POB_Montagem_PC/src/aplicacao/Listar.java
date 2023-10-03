@@ -39,7 +39,7 @@ public class Listar {
 		System.out.println("\n\n---Listagem dos Orçamentos:\n");
 		
 		Query q = manager.query();
-		q.constrain(Orcamento.class);  				
+		q.constrain(Orcamento.class);
 		List<Orcamento> resultados = q.execute();
 		for(Orcamento a: resultados)
 			System.out.println(a);

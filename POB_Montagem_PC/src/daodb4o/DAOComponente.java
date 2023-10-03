@@ -7,8 +7,21 @@ import modelo.Componente;
 
 public class DAOComponente extends DAO<Componente> {
 	
-	//o ID do componente é usado como campo unico
+	//read através da descrição
 	public Componente read (Object chave) {
+		String descricao = (String) chave;	//casting para o tipo da chave
+		Query q = manager.query();
+		q.constrain(Componente.class);
+		q.descend("descricao").constrain(descricao);
+		List<Componente> resultados = q.execute();
+		if (resultados.size()>0)
+			return resultados.get(0);
+		else
+			return null;
+	}
+	
+	//read através do id
+	public Componente readById (Object chave) {
 		int idComp = (int) chave;	//casting para o tipo da chave
 		Query q = manager.query();
 		q.constrain(Componente.class);
@@ -84,6 +97,20 @@ public class DAOComponente extends DAO<Componente> {
 	    }
 	    
 	    return result;
+	}
+	
+	
+	//Retornar id do Componente
+	public int acharIdComp(String descricao) {
+	    DAOComponente daoComp = new DAOComponente();
+	    Componente componente = daoComp.read(descricao); // Lê o componente com base na descrição
+	    if (componente != null) {
+	        return componente.getId(); // Retorna o ID do componente encontrado
+	    } else {
+	        // Se nenhum componente com a descrição especificada for encontrado, pode retornar um valor padrão ou lançar uma exceção, dependendo dos requisitos do seu aplicativo.
+	        // Por exemplo, você pode lançar uma exceção ou retornar -1 para indicar que o componente não foi encontrado.
+	        return -1; // Ou você pode lançar uma exceção aqui, se preferir.
+	    }
 	}
 	
 	

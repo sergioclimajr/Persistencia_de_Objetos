@@ -43,7 +43,7 @@ public class Apagar {
 			
 			//---> APAGAR TODOS OS CLIENTES cadastrados
 			
-			/*
+			
 			Query q1 = manager.query();
 			q1.constrain(Cliente.class);
 			List<Cliente> resultados1 = q1.execute();
@@ -52,12 +52,12 @@ public class Apagar {
 					manager.delete(cli);
 				manager.commit();
 			}
-			*/
+			
 			
 			
 			//---> APAGAR TODOS OS COMPONENTES cadastrados 
 			
-			/*
+			
 			Query q2 = manager.query();
 			q2.constrain(Componente.class);
 			List<Componente> resultados2 = q2.execute();
@@ -67,12 +67,12 @@ public class Apagar {
 					manager.delete(comp);
 				manager.commit();
 			}
-			*/
+			
 			
 			
 			//---> APAGAR ORCAMENTOS ORFAOS 
 			
-			/*
+			
 			Query q3 = manager.query();
 			q3.constrain(Orcamento.class);
 			List<Orcamento> resultados3 = q3.execute();
@@ -82,7 +82,7 @@ public class Apagar {
 					manager.delete(orc);
 				manager.commit();
 			}
-			*/
+			
 
 		} catch (Exception e) {
 			System.out.println(e.getMessage());

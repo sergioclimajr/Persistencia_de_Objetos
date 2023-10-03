@@ -18,6 +18,10 @@ public class Componente {
 		this.estoque = estoque;
 	}
 	
+	public Componente() {
+		
+	}
+	
 	public Componente (String descricao) {
 		this.descricao = descricao;
 	}
