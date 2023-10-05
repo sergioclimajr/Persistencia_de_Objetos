@@ -21,7 +21,7 @@ public class Apagar {
 			
 			Query q = manager.query();
 			q.constrain(Cliente.class);
-			q.descend("cpf").constrain("12345678911");
+			q.descend("cpf").constrain("12345678914");
 			List<Cliente> resultados = q.execute();
 			
 			if(resultados.size()>0) {

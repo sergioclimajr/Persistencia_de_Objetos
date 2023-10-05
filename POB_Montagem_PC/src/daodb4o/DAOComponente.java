@@ -1,6 +1,10 @@
 package daodb4o;
 
 import java.util.List;
+
+import com.db4o.ObjectSet;
+//import com.db4o.query.Candidate;
+//import com.db4o.query.Evaluation;
 import com.db4o.query.Query;
 
 import modelo.Componente;
@@ -8,20 +12,21 @@ import modelo.Componente;
 public class DAOComponente extends DAO<Componente> {
 	
 	//read através da descrição
-	public Componente read (Object chave) {
-		String descricao = (String) chave;	//casting para o tipo da chave
-		Query q = manager.query();
-		q.constrain(Componente.class);
-		q.descend("descricao").constrain(descricao);
-		List<Componente> resultados = q.execute();
-		if (resultados.size()>0)
-			return resultados.get(0);
-		else
-			return null;
+	public Componente readPorDescricao (Object chave) {
+		String descricao = (String) chave; // Casting para o tipo da chave
+	    Query q = manager.query();
+	    q.constrain(Componente.class);
+	    q.descend("descricao").constrain(descricao).like();
+	    ObjectSet<Componente> resultados = q.execute();
+
+	    if (!resultados.isEmpty())
+	        return resultados.get(0);
+	    else
+	        return null;
 	}
 	
 	//read através do id
-	public Componente readById (Object chave) {
+	public Componente read (Object chave) {
 		int idComp = (int) chave;	//casting para o tipo da chave
 		Query q = manager.query();
 		q.constrain(Componente.class);
@@ -99,11 +104,10 @@ public class DAOComponente extends DAO<Componente> {
 	    return result;
 	}
 	
-	
 	//Retornar id do Componente
 	public int acharIdComp(String descricao) {
 	    DAOComponente daoComp = new DAOComponente();
-	    Componente componente = daoComp.read(descricao); // Lê o componente com base na descrição
+	    Componente componente = daoComp.readPorDescricao(descricao); // Lê o componente com base na descrição
 	    if (componente != null) {
 	        return componente.getId(); // Retorna o ID do componente encontrado
 	    } else {
@@ -112,17 +116,13 @@ public class DAOComponente extends DAO<Componente> {
 	        return -1; // Ou você pode lançar uma exceção aqui, se preferir.
 	    }
 	}
-	
-	
-	/*-------------------------------------------------
-	@SuppressWarnings("serial")
-	class Filtro  implements Evaluation {
-		private int n;
-		public Filtro (int n) {this.n=n;}
-		public void evaluate(Candidate candidate) {
-			Componente comp = (Componente) candidate.getObject();
-			candidate.include( comp.getEstoque()==n );
-		}
+
+	public List<Componente> listarComponentesComEstoqueAcimaDe(int quantidade) {
+		Query q = manager.query();
+	    q.constrain(Componente.class);
+	    q.descend("estoque").constrain(quantidade).greater();
+	    List<Componente> resultados = q.execute();
+	    return resultados;
 	}
-	*/
+	
 }

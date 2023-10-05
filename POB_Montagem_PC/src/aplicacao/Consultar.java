@@ -42,7 +42,7 @@ public class Consultar {
 				System.out.println(o);
 			
 			
-			System.out.println("\nClientes que possuem mais de 1 Orçamento: ");
+			System.out.println("\nClientes que possuem mais de 2 Orçamento: ");
 			q = manager.query();
 			q.constrain(Cliente.class);
 			q.constrain(new Filtro1());
@@ -68,7 +68,7 @@ class Filtro1 implements Evaluation {
 	@Override
 	public void evaluate(Candidate candidate) {
 		Cliente cli = (Cliente) candidate.getObject();
-		if(cli.listarOrcamentos().size() > 1)
+		if(cli.listarOrcamentos().size() > 2)
 			candidate.include(true);
 		else
 			candidate.include(false);

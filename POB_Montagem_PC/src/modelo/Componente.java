@@ -1,6 +1,7 @@
 package modelo;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Componente {
 	
@@ -9,27 +10,22 @@ public class Componente {
 	private Double preco;
 	private int estoque;
 	
-	ArrayList <Orcamento> orcamentos = new ArrayList<Orcamento>();
-	
 	public Componente(int id, String descricao, Double preco, int estoque) {
 		this.id = id;
 		this.descricao = descricao;
 		this.preco = preco;
 		this.estoque = estoque;
-	}
-	
-	public Componente() {
 		
-	}
-	
-	public Componente (String descricao) {
-		this.descricao = descricao;
 	}
 	
 	public Componente (String descricao, double preco, int estoque) {
 		this.descricao = descricao;
 		this.preco = preco;
 		this.estoque = estoque;
+	}
+	
+	public Componente (String descricao) {
+		this.descricao = descricao;
 	}
 	
 	public int getId() {
@@ -62,18 +58,6 @@ public class Componente {
 	public void setEstoque(int estoque) {
 		this.estoque = estoque;
 	}
-	
-	public ArrayList<Orcamento> getOrcamentos() {
-		return orcamentos;
-	}
-	
-	public void adicionar(Orcamento orc){
-		orcamentos.add(orc);
-	}
-	
-	public void remover(Orcamento orc){
-		orcamentos.remove(orc);
-	}
 		
 	
 	@Override
@@ -85,5 +69,16 @@ public class Componente {
 				", Estoque: " + estoque + " unid.";
 		return texto;
 	}
-	
+	/*
+	public List<Orcamento> localizarCompEmOrcamentos(int idComp) {
+	    List<Orcamento> orcamentosComEsteComponente = new ArrayList<>();
+	    List<Orcamento> todosOrcamentos = new ArrayList<>();
+	    for (Orcamento orc : todosOrcamentos) {
+	        if (orc.getComponentes().contains(this)) {
+	            orcamentosComEsteComponente.add(orc);
+	        }
+	    }
+	    return orcamentosComEsteComponente;
+	}
+	*/
 }

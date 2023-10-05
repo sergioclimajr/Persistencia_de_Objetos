@@ -33,7 +33,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
 
-import daodb4o.DAOComponente;
+//import daodb4o.DAOComponente;
 import modelo.Componente;
 import modelo.Orcamento;
 import regras_negocio.Fachada;
@@ -219,6 +219,8 @@ public class TelaOrcamento {
 						Fachada.removerCompDoOrcamento(idOrc, idComp);
 						label.setText("Componente removido do orçamento.");
 						listagem();
+					} else {
+						label.setText("Nenhum orçamento selecionado.");
 					}
 				}
 				catch(Exception erro) {
@@ -275,27 +277,28 @@ public class TelaOrcamento {
 		button.setBounds(308, 11, 89, 23);
 		frame.getContentPane().add(button);
 
-		
+		//------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 		button_2 = new JButton("Apagar selecionado");
 		button_2.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try{
-					if (table.getSelectedRow() >= 0) {	
-						int idOrc = (int) table.getValueAt( table.getSelectedRow(), 0);
-
-						Fachada.excluirOrcamento(idOrc);
-						label.setText("Orçamento apagado" );
-						listagem();
-
-					}
-					else
-						label.setText("nao selecionado");
-				}
-				catch(Exception ex) {
-					label.setText(ex.getMessage());
-				}
-			}
+		    public void actionPerformed(ActionEvent e) {
+		        try {
+		            int selectedRow = table.getSelectedRow();
+		            if (selectedRow >= 0) {
+		                int idOrc = (int) table.getValueAt(selectedRow, 0);
+		                Fachada.excluirOrcamento(idOrc);
+		                label.setText("Orçamento apagado" );
+		                listagem();
+		            } else {
+		                label.setText("Nenhum orçamento selecionado");
+		            }
+		        } catch (Exception ex) {
+		            label.setText(ex.getMessage());
+		        }
+		    }
 		});
+		//-------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>
+		
+		
 		button_2.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		button_2.setBounds(540, 200, 150, 23);
 		frame.getContentPane().add(button_2);
@@ -333,10 +336,10 @@ public class TelaOrcamento {
 								texto += ("  ORÇ: " + "0" + orc.getId() + "  - CLIENTE: " + orc.getCliente().getNome() + "        \n\n");  
 								for (Componente comp : orc.getComponentes()) {
 									texto += "ID: " + comp.getId() + "    Peça: " + comp.getDescricao() + 
-											" Preço: " + comp.getPreco() + "         \n";
+											"      Preço: R$ " + comp.getPreco() + "         \n";
 								}
 							
-							texto += ("\n\nTotal: " + orc.getValor());
+							texto += ("\n\nTotal:  R$ " + orc.getValor());
 
 							JOptionPane.showMessageDialog(frame, texto, "Componentes", 1);
 						}

@@ -195,7 +195,7 @@ public class TelaCliente {
 		button_2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try{
-					if (table.getSelectedRow() >= 0){	
+					if (table.getSelectedRow() >= 0){
 						label.setText("nao implementado " );
 						String cpf = (String) table.getValueAt( table.getSelectedRow(), 0);
 						Fachada.excluirCliente(cpf);
@@ -228,7 +228,7 @@ public class TelaCliente {
 							if(cliente.listarOrcamentos().isEmpty())
 								texto = "Cliente não possui Orçamentos";
 							else
-								for (Orcamento o : cliente.listarOrcamentos()) 
+								for (Orcamento o : cliente.listarOrcamentos())
 									texto = texto + "ID nº: " + o.getId()+ "  - " + "Data: " + o.getData() + "\n";
 
 							

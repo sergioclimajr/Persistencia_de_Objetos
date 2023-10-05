@@ -15,6 +15,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.DefaultComboBoxModel;
@@ -32,8 +33,9 @@ import javax.swing.table.DefaultTableModel;
 
 import com.db4o.ObjectContainer;
 
-import modelo.Aluguel;
-import modelo.Carro;
+import modelo.Cliente;
+import modelo.Componente;
+import modelo.Orcamento;
 import regras_negocio.Fachada;
 
 public class TelaConsulta {
@@ -127,61 +129,57 @@ public class TelaConsulta {
 		frame.getContentPane().add(label_4);
 
 		button = new JButton("Consultar");
-		button.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		button.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				int index = comboBox.getSelectedIndex();
-				if(index<0)
-					label_4.setText("consulta nao selecionada");
-				else
-					switch(index) {
-					case 0: 
-						List<Aluguel> resultado1 = Fachada.alugueisFinalizados();
-						listagemAluguel(resultado1);
-						break;
-					case 1: 
-						String modelo = JOptionPane.showInputDialog("digite o modelo");
-						List<Aluguel> resultado2 = Fachada.alugueisModelo(modelo);
-						listagemAluguel(resultado2);
-						break;
-					case 2: 
-						String n = JOptionPane.showInputDialog("digite N");
-						int numero = Integer.parseInt(n);
-						List<Carro> resultado3 = Fachada.carrosNAlugueis(numero);
-						listagemCarro(resultado3);
-						break;
-
-					}
-
-			}
+		    public void actionPerformed(ActionEvent e) {
+		        int index = comboBox.getSelectedIndex();
+		        if (index < 0)
+		            label_4.setText("Consulta não selecionada");
+		        else
+		            switch (index) {
+		                case 0:
+		                    List<Componente> resultado1 = Fachada.listarComponentesComEstoqueAcimaDe(15);
+		                    listagemComponente(resultado1);
+		                    break;
+		                case 1:
+							List<Orcamento> resultado2 = null;
+							try {
+								resultado2 = Fachada.listarOrcamentosDoComponente("monitor");
+							} catch (Exception e1) {
+								e1.printStackTrace();
+							}
+			                    listagemOrcamento(resultado2);
+			                    break;
+		                case 2:
+		                    List<Cliente> resultado3 = Fachada.listarClientesComMaisDeNOrcamentos(2);
+		                    listagemCliente(resultado3);
+		                    break;
+		            }
+		    }
 		});
 		button.setBounds(606, 10, 89, 23);
 		frame.getContentPane().add(button);
 
 		comboBox = new JComboBox();
 		comboBox.setToolTipText("selecione a consulta");
-		comboBox.setModel(new DefaultComboBoxModel(new String[] {"alugueis finalizados", "alugueis de um determinado modelo de carro", "carros que possuem N alugueis"}));
+		comboBox.setModel(new DefaultComboBoxModel(new String[] {"a) Componentes com 'Estoque' acima de 15 unidades", "b) Orçamentos que contém componente 'Monitor'", "c) Clientes com mais de 2 orçamentos"}));
 		comboBox.setBounds(21, 10, 513, 22);
 		frame.getContentPane().add(comboBox);
 	}
 
-	public void listagemAluguel(List<Aluguel> lista) {
+	public void listagemOrcamento(List<Orcamento> lista) {
 		try{
 			// o model armazena todas as linhas e colunas do table
 			DefaultTableModel model = new DefaultTableModel();
 
 			//adicionar colunas no model
-			model.addColumn("id");
-			model.addColumn("nome");
-			model.addColumn("placa");
-			model.addColumn("data inicial");
-			model.addColumn("data final");
-			model.addColumn("total a pagar");
-			model.addColumn("finalizado");
+			model.addColumn("ID");
+			model.addColumn("Data");
+			model.addColumn("Cliente");
+			model.addColumn("Valor");
 
 			//adicionar linhas no model
-			for(Aluguel aluguel : lista) {
-				model.addRow(new Object[]{aluguel.getId(), aluguel.getCliente().getNome(), aluguel.getCarro().getPlaca(), aluguel.getDatainicio(), aluguel.getDatafim(), aluguel.getValor(), aluguel.isFinalizado()});
+			for(Orcamento orcamento : lista) {
+				model.addRow(new Object[]{orcamento.getId(), orcamento.getData(), orcamento.getCliente().getNome(), orcamento.getValor()});
 			}
 			//atualizar model no table (visualizacao)
 			table.setModel(model);
@@ -193,19 +191,44 @@ public class TelaConsulta {
 		}
 	}
 	
-	public void listagemCarro(List<Carro> lista) {
+	public void listagemComponente(List<Componente> lista) {
 		try{
 			// model armazena todas as linhas e colunas do table
 			DefaultTableModel model = new DefaultTableModel();
 
 			//adicionar colunas no model
-			model.addColumn("placa");
-			model.addColumn("modelo");
-			model.addColumn("alugado");
+			model.addColumn("ID");
+			model.addColumn("Descrição");
+			model.addColumn("Preço");
+			model.addColumn("Estoque");
 
 			//adicionar linhas no model
-			for(Carro car : lista) {
-				model.addRow(new Object[]{car.getPlaca(), car.getModelo(), car.isAlugado()} );
+			for(Componente comp : lista) {
+				model.addRow(new Object[]{comp.getId(), comp.getDescricao(), comp.getPreco(), comp.getEstoque()} );
+			}
+			//atualizar model no table (visualizacao)
+			table.setModel(model);
+
+			label_4.setText("resultados: "+lista.size()+ " objetos");
+		}
+		catch(Exception erro){
+			label.setText(erro.getMessage());
+		}
+	}
+	
+	
+	public void listagemCliente(List<Cliente> lista) {
+		try{
+			// model armazena todas as linhas e colunas do table
+			DefaultTableModel model = new DefaultTableModel();
+
+			//adicionar colunas no model
+			model.addColumn("CPF");
+			model.addColumn("Nome");
+
+			//adicionar linhas no model
+			for(Cliente cli : lista) {
+				model.addRow(new Object[]{cli.getCpf(), cli.getNome()} );
 			}
 			//atualizar model no table (visualizacao)
 			table.setModel(model);

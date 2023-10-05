@@ -14,7 +14,7 @@ import modelo.Usuario;
 
 public class DAOUsuario extends DAO<Usuario>{
 
-	public Usuario read (Object chave){
+	public Usuario readPorDescricao (Object chave){
 		String nome = (String) chave;	//casting para o tipo da chave
 		Query q = manager.query();
 		q.constrain(Usuario.class);

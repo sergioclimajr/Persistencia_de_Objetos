@@ -32,13 +32,13 @@ public class Cliente {
 	}
 	
 	public void adicionar(Orcamento orc){
-		orc.setCliente(this);
 		this.orcamentos.add(orc);
+		orc.setCliente(this);
 	}
 	
 	public void remover(Orcamento orc){
-		orc.setCliente(null);
 		this.orcamentos.remove(orc);
+		orc.setCliente(null);//-----------
 	}
 	
 	public Orcamento localizar(int idOrc) {

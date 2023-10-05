@@ -3,6 +3,7 @@ package regras_negocio;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.InputMismatchException;
 import java.util.List;
@@ -41,7 +42,7 @@ public class Fachada {
 	
 	//		Localizar Cliente através do CPF
 	public static Cliente localizarCliente(String cpf) throws Exception {
-		Cliente c = daocliente.read(cpf);
+		Cliente c = daocliente.readPorDescricao(cpf);
 		if (c == null) {
 			throw new Exception("nome inexistente: " + cpf);
 		}
@@ -50,7 +51,7 @@ public class Fachada {
 	
 	//		Localizar Orçamento
 	public static Orcamento localizarOrcamento(int idOrc) throws Exception {
-		Orcamento orc = daoorcamento.read(idOrc);
+		Orcamento orc = daoorcamento.readPorDescricao(idOrc);
 		if (orc == null) {
 			throw new Exception("Orçamento inexistente: " + orc);
 		}
@@ -59,10 +60,10 @@ public class Fachada {
 	
 	
 	//		Localizar Componente
-	public static Componente localizarComponente(String descricao) throws Exception {
-		Componente comp = daocomponente.read(descricao);
+	public static Componente localizarComponente(int idComp) throws Exception {
+		Componente comp = daocomponente.read(idComp);
 		if (comp == null) {
-			throw new Exception("Componente inexistente: " + descricao);
+			throw new Exception("Componente inexistente: " + idComp);
 		}
 		return comp;
 	}
@@ -82,7 +83,7 @@ public class Fachada {
 			DAO.rollback();
 			throw new Exception("CPF inválido! " + cpf);
 		}
-		Cliente c = daocliente.read(cpf);
+		Cliente c = daocliente.readPorDescricao(cpf);
 		if(c != null) {
 			DAO.rollback();
 			throw new Exception("Cliente já cadastrado " + cpf);
@@ -103,15 +104,13 @@ public class Fachada {
 	    
 	    try {
 	        // Verificando se já existe componente com a mesma descrição
-	        Componente c = daocomponente.read(descricao);
+	        Componente c = daocomponente.readPorDescricao(descricao);
 	        if (c != null) {
 	            DAO.rollback();
 	            throw new Exception("Criar Componente - componente já existe: " + descricao);
 	        }
 	        
-	        c = new Componente(descricao);
-	        c.setPreco(preco);
-	        c.setEstoque(estoque);
+	        c = new Componente(descricao, preco, estoque);
 	        
 	        daocomponente.create(c);
 	        
@@ -139,7 +138,7 @@ public class Fachada {
 			throw new Exception("Formato de data inválido: " + data);
 		}
 	    
-	    Cliente cliente = daocliente.read(cpf);
+	    Cliente cliente = daocliente.readPorDescricao(cpf);
 	    if (cliente == null) {
 	    	DAO.rollback();
 	    	throw new Exception("Cliente não cadastrado: " + cpf);
@@ -147,7 +146,9 @@ public class Fachada {
 	    	
 	        orc.setData(data);
 	        orc.setCliente(cliente);
+	        cliente.listarOrcamentos().add(orc);
 	        daoorcamento.create(orc);
+	        daocliente.update(cliente);
 	        DAO.commit();
 	    }
         
@@ -164,7 +165,7 @@ public class Fachada {
 	//			Excluir Cliente
 	public static void excluirCliente(String cpf) throws Exception {
 		DAO.begin();
-		Cliente cli = daocliente.read(cpf);
+		Cliente cli = daocliente.readPorDescricao(cpf);
 		if (cli == null) {
 			DAO.rollback();
 			throw new Exception("Excluir Cliente - cliente inexistente: CPF nº " + cpf);
@@ -181,42 +182,56 @@ public class Fachada {
 		DAO.commit();
 	}
 	
-	
+	//--------------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	//			Excluir Orçamento
 	public static void excluirOrcamento(int idOrc) throws Exception {
-		DAO.begin();
-		Orcamento orc = daoorcamento.read(idOrc);
-		if (orc == null) {
-			DAO.rollback();
-			throw new Exception("Excluir Orçamento - orçamento inexistente: ID nº " + idOrc);
-		}
-		
-		// desligar o Cliente de seus Orçamentos (órfãos) e apagá-los do banco
-		for (Componente comp : orc.getComponentes()) {
-			orc.remover(comp);
-			daoorcamento.update(orc);
-		}
-		
-		daoorcamento.delete(orc); // apagar o Orçamento
-		DAO.commit();
+	    DAO.begin();
+	    
+	    Orcamento orc = daoorcamento.readPorDescricao(idOrc);
+	    
+	    if (orc == null) {
+	        DAO.rollback();
+	        throw new Exception("Excluir Orçamento - orçamento inexistente: ID nº " + idOrc);
+	    }
+
+	    // Copiar a lista de componentes para evitar a modificação durante a iteração
+	    List<Componente> componentes = new ArrayList<>(orc.getComponentes());
+
+	    // Remover o orçamento de cada componente
+	    for (Componente comp : componentes) {
+	        orc.remover(comp);
+	    }
+	    
+	    componentes.clear();
+	    
+	    Cliente cli = daocliente.readPorDescricao(orc.getCliente().getCpf()); //....orc.getCliente().getCpf()
+	    cli.remover(orc);
+	    
+	    daocliente.update(cli);
+	    
+	    daoorcamento.delete(orc); // Apagar o Orçamento
+	    DAO.commit();
 	}
-	
+	//--------------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	
 	//			Excluir Componente do Banco de Dados
-	public static void excluirComponente(String descricao) throws Exception {
-		DAO.begin();
-		Componente comp = daocomponente.read(descricao);
-		if (comp == null) {
-			DAO.rollback();
-			throw new Exception("Excluir Componente - componente inexistente");
-		}
-		
-		for (Orcamento orc : comp.getOrcamentos()) {
-			orc.remover(comp);
-		}
-		
-		daocomponente.delete(comp); // apagar o Componente
-		DAO.commit();
+	public static void excluirComponente(int idComp) throws Exception {
+	    DAO.begin();
+	    Componente comp = daocomponente.read(idComp);
+	    if (comp == null) {
+	        DAO.rollback();
+	        throw new Exception("Excluir Componente - componente inexistente");
+	    }
+
+	    // Verifica se o componente está presente em algum orçamento
+	    ArrayList<Orcamento> orcamentosComEsteComponente = daoorcamento.encontrarOrcamentosPorComponente(idComp);
+	    if (!orcamentosComEsteComponente.isEmpty()) {
+	        DAO.rollback();
+	        throw new Exception("Componente consta em um ou mais orçamentos");
+	    }
+
+	    daocomponente.delete(comp); // apagar o Componente
+	    DAO.commit();
 	}
 	
 	
@@ -238,6 +253,9 @@ public class Fachada {
 		DAO.begin();
 		List<Orcamento> result = daoorcamento.readAll();
 		DAO.commit();
+		if (result.isEmpty()) {
+	        System.out.println("A lista de orçamentos está vazia.");
+	    }
 		return result;
 	}
 	
@@ -270,7 +288,7 @@ public class Fachada {
 	//		ALTERAR DATA DO ORÇAMENTO
 	public static void alterarDataOrcamento(int idOrc, String data) throws Exception {
 		DAO.begin();
-		Orcamento orc = daoorcamento.read(idOrc);
+		Orcamento orc = daoorcamento.readPorDescricao(idOrc);
 		if (orc == null) {
 			DAO.rollback();
 			throw new Exception("Alterar data do orçamento - orçamento inexistente: ID nº " + idOrc);
@@ -283,38 +301,17 @@ public class Fachada {
 	}
 	
 	
-	//		ADICIONAR PEÇA AO ORÇAMENTO
-	public static void adicionarCompAoOrcamento(int idOrc, String descricao) throws Exception {
-		DAO.begin();
-		Orcamento orc = daoorcamento.read(idOrc);
-		if (orc == null) {
-			DAO.rollback();
-			throw new Exception("Adicionar componente ao orçamento - orçamento inexistente.");
-		}
-		
-		Componente comp = daocomponente.read(descricao);
-		if (comp == null) {
-			DAO.rollback();
-			throw new Exception("Adicionar componente ao orçamento - componente inexistente: ID nº " + idOrc);
-		}
-		
-		orc.adicionar(comp);
-		daoorcamento.update(orc);
-				
-		DAO.commit();
-	}
-	
 	
 	//		ADICIONAR PEÇA AO ORÇAMENTO PELO ID
 	public static void adicionarCompAoOrcamento(int idOrc, int idComp) throws Exception {
 		DAO.begin();
-		Orcamento orc = daoorcamento.read(idOrc);
+		Orcamento orc = daoorcamento.readPorDescricao(idOrc);
 		if (orc == null) {
 			DAO.rollback();
 			throw new Exception("Adicionar componente ao orçamento - orçamento inexistente.");
 		}
 		
-		Componente comp = daocomponente.readById(idComp);
+		Componente comp = daocomponente.read(idComp);
 		if (comp == null) {
 			DAO.rollback();
 			throw new Exception("Adicionar componente ao orçamento - componente inexistente.");
@@ -327,66 +324,69 @@ public class Fachada {
 	}
 	
 	
-	//			REMOVER PEÇA DO ORÇAMENTO PELA DESCRIÇÃO
-	public static void removerCompDoOrcamento(int idOrc, String descricao) throws Exception {
+	//			REMOVER PEÇA DO ORÇAMENTO PELO ID
+	public static void removerCompDoOrcamento(int idOrc, int idComp) throws Exception {
 		DAO.begin();
-		Orcamento orc = daoorcamento.read(idOrc);
+		Orcamento orc = daoorcamento.readPorDescricao(idOrc);
 		if (orc == null) {
 			DAO.rollback();
 			throw new Exception("Remover componente do orçamento - orçamento inexistente: ID nº " + idOrc);
 		}
 		
-		Componente comp = orc.localizar(descricao);
+		Componente comp = orc.localizar(idComp);
 		if (comp == null) {
+			DAO.rollback();
 			throw new Exception("Remover componente do orçamento - componente não consta no orçamento");
 		}
 		
 		orc.remover(comp);
 		daoorcamento.update(orc);
-		
+	
 		DAO.commit();
 	}
-	
-	
-	//	REMOVER PEÇA DO ORÇAMENTO PELA DESCRIÇÃO
-	public static void removerCompDoOrcamento(int idOrc, int idComp) throws Exception {
-	DAO.begin();
-	Orcamento orc = daoorcamento.read(idOrc);
-	if (orc == null) {
-		DAO.rollback();
-		throw new Exception("Remover componente do orçamento - orçamento inexistente: ID nº " + idOrc);
-	}
-	
-	Componente comp = orc.localizar(idComp);
-	if (comp == null) {
-		throw new Exception("Remover componente do orçamento - componente não consta no orçamento");
-	}
-	
-	orc.remover(comp);
-	daoorcamento.update(orc);
-	
-	DAO.commit();
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	public static boolean validarCPF(String cpf) {
         String cpfNumerico = cpf.replaceAll("[^0-9]", "");
         return cpfNumerico.length() == 11;
     }
 	
+	// ---------------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>
+	
+	
+	
+	public static ArrayList<Orcamento> listarOrcamentosDoComponente(int idComp) throws Exception {
+		DAO.begin();
+		ArrayList<Orcamento> resultado = daoorcamento.encontrarOrcamentosPorComponente(idComp);
+		
+		if (resultado.isEmpty()) {
+			throw new Exception("Componente não faz parte de nenhum orçamento");
+		}
+		return resultado;
+	}
+	
+	
+	public static ArrayList<Orcamento> listarOrcamentosDoComponente(String descricao) throws Exception {
+		DAO.begin();
+		ArrayList<Orcamento> resultado = daoorcamento.encontrarOrcamentosPorComponente(descricao);
+		
+		if (resultado.isEmpty()) {
+			throw new Exception("Componente não faz parte de nenhum orçamento");
+		}
+		return resultado;
+	}
+	
+	
+	
+	// ---------------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>
+	
+	
+	
+	
 	
 	//------------------Usuario------------------------------------
 	public static Usuario cadastrarUsuario(String nome, String senha) throws Exception{
 		DAO.begin();
-		Usuario usu = daousuario.read(nome);
+		Usuario usu = daousuario.readPorDescricao(nome);
 		if (usu!=null)
 			throw new Exception("Usuario ja cadastrado:" + nome);
 		usu = new Usuario(nome, senha);
@@ -397,12 +397,26 @@ public class Fachada {
 	}
 	
 	public static Usuario localizarUsuario(String nome, String senha) {
-		Usuario usu = daousuario.read(nome);
+		Usuario usu = daousuario.readPorDescricao(nome);
 		if (usu==null)
 			return null;
 		if (! usu.getSenha().equals(senha))
 			return null;
 		return usu;
+	}
+
+	public static List<Componente> listarComponentesComEstoqueAcimaDe(int quantidade) {
+	    DAO.begin();
+	    List<Componente> result = daocomponente.listarComponentesComEstoqueAcimaDe(quantidade);
+	    DAO.commit();
+	    return result;
+	}
+
+	public static List<Cliente> listarClientesComMaisDeNOrcamentos(int quantidade) {
+	    DAO.begin();
+	    List<Cliente> result = daocliente.readByNOrcamentos(quantidade);
+	    DAO.commit();
+	    return result;
 	}
 	
 }

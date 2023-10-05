@@ -15,6 +15,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -32,6 +33,8 @@ import javax.swing.table.DefaultTableModel;
 
 import com.db4o.ObjectContainer;
 
+import daodb4o.DAO;
+import daodb4o.DAOOrcamento;
 import modelo.Orcamento;
 import modelo.Componente;
 import regras_negocio.Fachada;
@@ -51,8 +54,6 @@ public class TelaComponente {
 	private JLabel label_3;
 	private JLabel label_4;
 	private JLabel label_5;
-
-	private ObjectContainer manager;
 	private JButton button_3;
 
 	/**
@@ -76,6 +77,7 @@ public class TelaComponente {
 	public TelaComponente() {
 		initialize();
 		frame.setVisible(true);
+		
 	}
 
 	/**
@@ -210,10 +212,10 @@ public class TelaComponente {
 		button_2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try{
-					if (table.getSelectedRow() >= 0){	
+					if (table.getSelectedRow() >= 0){
 						label.setText("nao implementado " );
-						String descricao = (String) table.getValueAt( table.getSelectedRow(), 1);
-						Fachada.excluirComponente(descricao);
+						int idComp = (int) table.getValueAt( table.getSelectedRow(), 0);
+						Fachada.excluirComponente(idComp);
 						label.setText("componente apagado" );
 						listagem();
 					}
@@ -234,30 +236,31 @@ public class TelaComponente {
 		button_3 = new JButton("Exibir orçamentos");
 		button_3.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		button_3.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try{
-					if (table.getSelectedRow() >= 0){	
-						String descricao = (String) table.getValueAt( table.getSelectedRow(), 1);
-						Componente comp = Fachada.localizarComponente(descricao);
-
-						if(comp != null) {
-							String texto="";
-							if(comp.getOrcamentos().isEmpty())
-								texto = "Componente não está em nenhum Orçamento";
-							else
-								for (Orcamento orc : comp.getOrcamentos()) {
-									texto = texto + "ID: " + orc.getId()+ " - " + "Cliente: " + orc.getCliente().getNome() + " - "  + "Data: " + orc.getData()+ "\n";
-								}
-
-							JOptionPane.showMessageDialog(frame, texto, "Orçamentos", 1);
-						}
-					}
-				}
-				catch(Exception erro) {
-					label.setText(erro.getMessage());
-				}
-			}
+		    public void actionPerformed(ActionEvent e) {
+		        try {
+		            if (table.getSelectedRow() >= 0) {
+		                int idComp = (int) table.getValueAt(table.getSelectedRow(), 0);
+		                List<Orcamento> orcamentosComEsteComponente = Fachada.listarOrcamentosDoComponente(idComp);
+		                
+		                if (orcamentosComEsteComponente.isEmpty()) {
+		                    JOptionPane.showMessageDialog(frame, "Nenhum orçamento encontrado para o componente de ID nº " + idComp, "Orçamentos com Componente", JOptionPane.INFORMATION_MESSAGE);
+		                } else {
+		                    String mensagem = "Orçamentos com o componente de ID nº " + idComp + ":     \n";
+		                    for (Orcamento orcamento : orcamentosComEsteComponente) {
+		                        mensagem += "ID nº: 0" + orcamento.getId() + "\n";
+		                    }
+		                    JOptionPane.showMessageDialog(frame, mensagem, "Orçamentos com Componente", JOptionPane.INFORMATION_MESSAGE);
+		                }
+		            } else {
+		                JOptionPane.showMessageDialog(frame, "Nenhum componente selecionado.", "Seleção Vazia", JOptionPane.INFORMATION_MESSAGE);
+		            }
+		        } catch (Exception ex) {
+		            JOptionPane.showMessageDialog(frame, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+		            ex.printStackTrace();
+		        }
+		    }
 		});
+		
 		button_3.setBounds(300, 200, 170, 23);
 		frame.getContentPane().add(button_3);
 	}

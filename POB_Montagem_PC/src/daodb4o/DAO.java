@@ -28,7 +28,7 @@ public abstract class DAO<T> implements DAOInterface<T> {
 		manager.store( obj );
 	}
 
-	public abstract T read(Object chave);	//sobrescrito nas subclasses
+	public abstract T readPorDescricao(Object chave);	//sobrescrito nas subclasses
 
 	public T update(T obj){
 		manager.store(obj);

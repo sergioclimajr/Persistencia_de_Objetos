@@ -1,5 +1,6 @@
 package daodb4o;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.db4o.query.Query;
@@ -13,7 +14,7 @@ public class DAOOrcamento extends DAO<Orcamento>  {
 	//o ID do Orçamento é usado como campo unico 
 	
 	@Override
-	public Orcamento read (Object chave) {
+	public Orcamento readPorDescricao (Object chave) {
 		int idOrc = (int) chave;	//casting para o tipo da chave
 		Query q = manager.query();
 		q.constrain(Orcamento.class);
@@ -61,7 +62,7 @@ public class DAOOrcamento extends DAO<Orcamento>  {
 	
 	//------------------------------------------------
 	
-	//Pesquisa Orçamentos por DATA específica (CORRIGIR)....................
+	//Pesquisa Orçamentos por DATA específica 
 	
 	public List<Orcamento>  readByCliente(String cpfCli) {
 		Query q = manager.query();
@@ -76,6 +77,24 @@ public class DAOOrcamento extends DAO<Orcamento>  {
 	
 	//------------------------------------------------
 	
-	
+	public ArrayList<Orcamento> encontrarOrcamentosPorComponente(int idComp) {
+	    Query q = manager.query();
+	    q.constrain(Orcamento.class);
+	    q.descend("componentes").descend("id").constrain(idComp);
+	    List<Orcamento> result = q.execute();
+	    ArrayList<Orcamento> resultado = new ArrayList<>(result);
+	    
+	    return resultado;
+	}
+
+	public ArrayList<Orcamento> encontrarOrcamentosPorComponente(String descricao) {
+		Query q = manager.query();
+	    q.constrain(Orcamento.class);
+	    q.descend("componentes").descend("descricao").constrain(descricao).like();
+	    List<Orcamento> result = q.execute();
+	    ArrayList<Orcamento> resultado = new ArrayList<>(result);
+	    
+	    return resultado;
+	}
 	
 }

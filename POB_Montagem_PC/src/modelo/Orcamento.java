@@ -30,7 +30,6 @@ public class Orcamento {
 	
 	public void setCliente(Cliente cliente) {
 		this.cliente = cliente;
-		cliente.listarOrcamentos().add(this);
 	}
 	
 	public int getId() {
@@ -51,13 +50,11 @@ public class Orcamento {
 	
 	public void adicionar(Componente componente){
 		this.componentes.add(componente);
-		componente.adicionar(this);
 		this.valor += componente.getPreco();
 	}
 	
 	public void remover(Componente componente){
 		this.componentes.remove(componente);
-		componente.remover(this);
 		this.valor -= componente.getPreco();
 	}
 	

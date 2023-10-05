@@ -1,8 +1,10 @@
 package daodb4o;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
+import com.db4o.ObjectSet;
 import com.db4o.query.Candidate;
 import com.db4o.query.Evaluation;
 import com.db4o.query.Query;
@@ -12,7 +14,7 @@ import modelo.Cliente;
 public class DAOCliente extends DAO<Cliente>{
 
 	//CPF é usado como campo unico 
-	public Cliente read (Object chave) {
+	public Cliente readPorDescricao (Object chave) {
 		String cpf = (String) chave;	//casting para o tipo da chave
 		Query q = manager.query();
 		q.constrain(Cliente.class);
@@ -66,36 +68,6 @@ public class DAOCliente extends DAO<Cliente>{
 		q.constrain(new Filtro(numDeOrcamentos));
 		List<Cliente> result = q.execute();
 		return result;
-	}
-	//------------------------------------------------
-	
-	
-	/* UTILIZAR ESSE MÉTODO PARA FAZER PESQUISA DE ORÇAMENTOS ATRAVÉS DO MÊS
-	
-	public List<Cliente>  readByMes(String mes) {
-		Query q = manager.query();
-		q.constrain(Cliente.class);
-		q.descend("dtnascimento").constrain("/"+mes+"/").contains();
-		return q.execute();
-	}
-	
-	
-	Os dois métodos abaixo não se aplicam às nossas regras de negócio.
-	
-	public boolean temTelefoneCelular(String nome) {
-		Query q = manager.query();
-		q.constrain(Pessoa.class);
-		q.descend("nome").constrain(nome);
-		q.descend("telefones").descend("numero").constrain("9").startsWith(true);
-		return q.execute().size()>0;
-	}
-
-	public boolean temTelefoneFixo(String nome) {
-		Query q = manager.query();
-		q.constrain(Pessoa.class);
-		q.descend("nome").constrain(nome);
-		q.descend("telefones").descend("numero").constrain("3").startsWith(true);;
-		return q.execute().size()>0;
 	}
 
 
